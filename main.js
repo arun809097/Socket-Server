@@ -5,17 +5,17 @@ app.use(express.static("public"));
 const WebSocket1 = require('ws');
 
  
-const ws = new WebSocket1('wss://circle-data.yply.xyz:3031/socket.io/?EIO=4&transport=websocket');
-ws.on('open', () => {
+const wss = new WebSocket1('wss://circle-data.yply.xyz:3031/socket.io/?EIO=4&transport=websocket');
+wss.on('open', () => {
     console.log('Connected to WebSocket');
 });
  
 
-ws.on('close', () => {
+wss.on('close', () => {
     console.log('WebSocket connection closed');
 });
 
-ws.on('error', (error) => {
+wss.on('error', (error) => {
     console.error('WebSocket error:', error);
 });
 const serverPort = process.env.PORT || 3002;
@@ -48,7 +48,7 @@ wss.on("connection", function (ws, req) {
       console.log('keepAlive');
       return;
     }  
-   ws.on('message', (data) => {
+   wss.on('message', (data) => {
     if (Buffer.isBuffer(data)) {
         // Convert binary data to a UTF-8 string
         const utf8String = data.toString('utf8');
