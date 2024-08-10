@@ -1,11 +1,43 @@
 const http = require("http");
 const express = require("express");
 const app = express();
-
+const IO = require('socket.io-client');
 app.use(express.static("public"));
 // require("dotenv").config();
 
-const serverPort = process.env.PORT || 3000;
+
+
+    const socket = IO('wss://eventv4.urbet.in', {
+      transports: ['websocket'],
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      reconnectionAttempts: 99999,
+      extraHeaders: {
+        Origin: 'https://urbet.in' // Replace with your desired custom origin
+      }
+    });
+  
+    socket.on('connect', () => {
+      console.log('_type');
+      socket.emit('casino', 'abj');
+    });
+
+
+    
+    
+      
+       
+    
+      socket.on('disconnect', () => {
+        console.log('WebSocket connection closed');
+      });
+    
+
+
+
+
+const serverPort = process.env.PORT || 3002;
 const server = http.createServer(app);
 const WebSocket = require("ws");
 
@@ -27,14 +59,18 @@ wss.on("connection", function (ws, req) {
     console.log("first connection. starting keepalive");
     keepServerAlive();
   }
-
+ socket.on('casino/abj' , (data) => {
+         broadcast(ws, JSON.stringify(data), true);
+      });
+    
   ws.on("message", (data) => {
     let stringifiedData = data.toString();
     if (stringifiedData === 'pong') {
       console.log('keepAlive');
       return;
-    }
-    broadcast(ws, stringifiedData, false);
+    }  
+   
+   
   });
 
   ws.on("close", (data) => {
