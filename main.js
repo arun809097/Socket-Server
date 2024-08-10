@@ -7,6 +7,26 @@ app.use(express.static("public"));
 
 
 
+
+
+
+
+const serverPort = process.env.PORT || 3002;
+const server = http.createServer(app);
+const WebSocket = require("ws");
+
+let keepAliveId;
+
+const wss =
+  process.env.NODE_ENV === "production"
+    ? new WebSocket.Server({ server })
+    : new WebSocket.Server({ port: 5001 });
+
+server.listen(serverPort);
+
+
+
+
     const socket = IO('wss://eventv4.urbet.in', {
       transports: ['websocket'],
       reconnection: true,
@@ -43,18 +63,9 @@ socket.on('reconnect', (attemptNumber) => {
 
 
 
-const serverPort = process.env.PORT || 3002;
-const server = http.createServer(app);
-const WebSocket = require("ws");
 
-let keepAliveId;
 
-const wss =
-  process.env.NODE_ENV === "production"
-    ? new WebSocket.Server({ server })
-    : new WebSocket.Server({ port: 5001 });
 
-server.listen(serverPort);
 console.log(`Server started on port ${serverPort} in stage ${process.env.NODE_ENV}`);
 
 wss.on("connection", function (ws, req) {
