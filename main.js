@@ -1,4 +1,4 @@
-const https = require("https");
+const http = require("http");
 const express = require("express");
 const app = express();
 app.use(express.static("public"));
@@ -19,7 +19,7 @@ wssk.on('error', (error) => {
     console.error('WebSocket error:', error);
 });
 const serverPort = process.env.PORT || 3002;
-const server = https.createServer(app);
+const server = http.createServer(app);
 const WebSocket = require("ws");
 
 let keepAliveId;
