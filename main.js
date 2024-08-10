@@ -1,45 +1,29 @@
 const http = require("http");
 const express = require("express");
 const app = express();
-const IO = require('socket.io-client');
 app.use(express.static("public"));
-// require("dotenv").config();
+const WebSocket1 = require('ws');
+const ws = new WebSocket1('wss://eventv4.urbet.in/socket.io/?EIO=4&transport=websocket', {
+    headers: {
+        Origin: 'https://urbet.in' // Replace with your desired origin
+    }
+});
 
+ws.on('open', () => {
+    console.log('Connected to WebSocket');
+});
 
-try {
-    const socket = IO('wss://circle-data.yply.xyz:3031/', {
-      transports: ['websocket'],
-      reconnection: true,
-      reconnectionDelay: 1000,
-      reconnectionDelayMax: 5000,
-      reconnectionAttempts: 99999,
-      extraHeaders: {
-        Origin: 'http://circle-data.yply.xyz' // Replace with your desired custom origin
-      }
-    });
-  
-    socket.on('connect', () => {
-      console.log('Connected to WebSocket');
-      socket.emit('casino', 'abj');
-    });
-  
-    socket.on('disconnect', () => {
-      console.log('WebSocket connection closed');
-    });
-  
-    socket.on('error', (error) => {
-      console.error('WebSocket connection error:', error);
-    });
-  
-    socket.on('connect_error', (error) => {
-      console.error('Connection error:', error);
-    });
-  
-  } catch (err) {
-    console.error('Synchronous error caught:', err);
-  }
+ws.on('message', (data) => {
+    console.log('Received message:', data);
+});
 
+ws.on('close', () => {
+    console.log('WebSocket connection closed');
+});
 
+ws.on('error', (error) => {
+    console.error('WebSocket error:', error);
+});
 const serverPort = process.env.PORT || 3002;
 const server = http.createServer(app);
 const WebSocket = require("ws");
