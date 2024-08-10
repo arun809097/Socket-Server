@@ -3,8 +3,13 @@ const express = require("express");
 const app = express();
 app.use(express.static("public"));
 const WebSocket1 = require('ws');
-const ws = new WebSocket1('wss://eventv4.urbet.in/socket.io/?EIO=4&transport=websocket');
 
+ 
+const ws = new WebSocket1('wss://eventv4.urbet.in/socket.io/?EIO=4&transport=websocket', {
+    headers: {
+        Origin: 'https://urbet.in' // Replace with your desired origin
+    }
+});
 ws.on('open', () => {
     console.log('Connected to WebSocket');
 });
