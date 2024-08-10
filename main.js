@@ -32,7 +32,7 @@ try {
     });
   
     socket.on('connect_error', (error) => {
-      console.error('Connection error:', error.message);
+      console.error('Connection error:', error);
     });
   
   } catch (err) {
