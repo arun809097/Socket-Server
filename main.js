@@ -9,10 +9,7 @@ const ws = new WebSocket1('wss://circle-data.yply.xyz:3031/socket.io/?EIO=4&tran
 ws.on('open', () => {
     console.log('Connected to WebSocket');
 });
-
-ws.on('message', (data) => {
-    console.log('Received message:', data);
-});
+ 
 
 ws.on('close', () => {
     console.log('WebSocket connection closed');
@@ -51,7 +48,16 @@ wss.on("connection", function (ws, req) {
       console.log('keepAlive');
       return;
     }  
-   
+   ws.on('message', (data) => {
+    if (Buffer.isBuffer(data)) {
+        // Convert binary data to a UTF-8 string
+        const utf8String = data.toString('utf8');
+    broadcast(ws, utf8String, false);
+    } else if (typeof data === 'string') {
+        // Handle text data directly
+        console.log('Received UTF-8 message:', data);
+    }
+});
    
   });
 
