@@ -1,65 +1,118 @@
 const http = require("http");
 const express = require("express");
-const socketIO = require('socket.io');
 const app = express();
-
+const IO = require('socket.io-client');
 app.use(express.static("public"));
+// require("dotenv").config();
 
-const serverPort = process.env.PORT || 3000;
+
+
+    const socket = IO('wss://eventv4.urbet.in', {
+      transports: ['websocket'],
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      reconnectionAttempts: 99999,
+      extraHeaders: {
+        Origin: 'https://urbet.in' // Replace with your desired custom origin
+      }
+    });
+  
+    socket.on('connect', () => {
+      console.log('_type');
+      socket.emit('casino', 'abj');
+    });
+
+
+    
+    
+      
+       
+    
+      socket.on('disconnect', () => {
+        console.log('WebSocket connection closed');
+      });
+    
+
+
+
+
+const serverPort = process.env.PORT || 3002;
 const server = http.createServer(app);
-const io = socketIO(server);
-
-server.listen(serverPort, () => {
-    console.log(`Server started on port ${serverPort} in stage ${process.env.NODE_ENV}`);
-});
+const WebSocket = require("ws");
 
 let keepAliveId;
 
-io.on("connection", (socket) => {
-    console.log("Connection Opened");
-    console.log("Client size: ", io.sockets.sockets.size);
+const wss =
+  process.env.NODE_ENV === "production"
+    ? new WebSocket.Server({ server })
+    : new WebSocket.Server({ port: 5001 });
 
-    if (io.sockets.sockets.size === 1) {
-        console.log("First connection. Starting keepalive");
-        keepServerAlive();
+server.listen(serverPort);
+console.log(`Server started on port ${serverPort} in stage ${process.env.NODE_ENV}`);
+
+wss.on("connection", function (ws, req) {
+  console.log("Connection Opened");
+  console.log("Client size: ", wss.clients.size);
+
+  if (wss.clients.size === 1) {
+    console.log("first connection. starting keepalive");
+    keepServerAlive();
+  }
+
+  ws.on("message", (data) => {
+    let stringifiedData = data.toString();
+    if (stringifiedData === 'pong') {
+      console.log('keepAlive');
+      return;
+    }  
+    socket.on('casino/abj' , (data) => {
+         broadcast(ws, JSON.stringify(data), false);
+      });
+    
+   
+  });
+
+  ws.on("close", (data) => {
+    console.log("closing connection");
+
+    if (wss.clients.size === 0) {
+      console.log("last client disconnected, stopping keepAlive interval");
+      clearInterval(keepAliveId);
     }
-
-    socket.on("message", (data) => {
-        let stringifiedData = data.toString();
-        if (stringifiedData === 'pong') {
-            console.log('keepAlive');
-            return;
-        }
-        broadcast(socket, stringifiedData, false);
-    });
-
-    socket.on("disconnect", () => {
-        console.log("Closing connection");
-
-        if (io.sockets.sockets.size === 0) {
-            console.log("Last client disconnected, stopping keepAlive interval");
-            clearInterval(keepAliveId);
-        }
-    });
+  });
 });
 
-// Implement broadcast function
-const broadcast = (socket, message, includeSelf) => {
-    if (includeSelf) {
-        socket.broadcast.emit('message', message);
-    } else {
-        socket.broadcast.emit('message', message);
-    }
+// Implement broadcast function because of ws doesn't have it
+const broadcast = (ws, message, includeSelf) => {
+  if (includeSelf) {
+    wss.clients.forEach((client) => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(message);
+      }
+    });
+  } else {
+    wss.clients.forEach((client) => {
+      if (client !== ws && client.readyState === WebSocket.OPEN) {
+        client.send(message);
+      }
+    });
+  }
 };
 
 /**
  * Sends a ping message to all connected clients every 50 seconds
  */
-const keepServerAlive = () => {
-    keepAliveId = setInterval(() => {
-        io.sockets.emit('ping');
-    }, 50000);
+ const keepServerAlive = () => {
+  keepAliveId = setInterval(() => {
+    wss.clients.forEach((client) => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send('ping');
+      }
+    });
+  }, 50000);
 };
+
 
 app.get('/', (req, res) => {
     res.send('Hello World!');
