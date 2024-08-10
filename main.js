@@ -56,7 +56,7 @@ wss.on("connection", function (ws, req) {
   console.log("Client size: ", wss.clients.size);
 
   if (wss.clients.size === 1) {
-    console.log("first connection. starting keepalive");
+    console.log("first connection. starting keepalivezzzz");
     keepServerAlive();
   }
  socket.on('casino/abj' , (data) => {
