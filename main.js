@@ -18,16 +18,19 @@ app.use(express.static("public"));
       }
     });
   
-    socket.on('connect', () => {
-      console.log('_type');
-      socket.emit('casino', 'abj');
-    });
+ socket.on('error', (error) => {
+  console.error('WebSocket error occurred:', error);
+});
 
+// Handling reconnection attempts
+socket.on('reconnect_attempt', (attemptNumber) => {
+  console.log(`Reconnect attempt #${attemptNumber}`);
+});
 
-    
-    
-      
-       
+// Handling successful reconnections
+socket.on('reconnect', (attemptNumber) => {
+  console.log(`Successfully reconnected after ${attemptNumber} attempts`);
+});
     
       socket.on('disconnect', () => {
         console.log('WebSocket connection closed');
