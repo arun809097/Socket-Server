@@ -17,7 +17,10 @@ app.use(express.static("public"));
         Origin: 'https://urbet.in' // Replace with your desired custom origin
       }
     });
-  
+     socket.on('connect', () => {
+      console.log('connected to server');
+      socket.emit('casino', 'abj');
+    });
  socket.on('error', (error) => {
   console.error('WebSocket error occurred:', error);
 });
