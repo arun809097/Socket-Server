@@ -6,33 +6,38 @@ app.use(express.static("public"));
 // require("dotenv").config();
 
 
-
-    const socket = IO('wss://circle-data.yply.xyz:3031/', {
+try {
+    const socket = IO('wss://eventv4.urbet.in', {
       transports: ['websocket'],
       reconnection: true,
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,
-      reconnectionAttempts: 99999
-   
+      reconnectionAttempts: 99999,
+      extraHeaders: {
+        Origin: 'https://urbet.in' // Replace with your desired custom origin
+      }
     });
   
     socket.on('connect', () => {
-      console.log('_type');
+      console.log('Connected to WebSocket');
       socket.emit('casino', 'abj');
     });
-
-
-    
-    
-      
-       
-    
-      socket.on('disconnect', () => {
-        console.log('WebSocket connection closed');
-      });
-    
-
-
+  
+    socket.on('disconnect', () => {
+      console.log('WebSocket connection closed');
+    });
+  
+    socket.on('error', (error) => {
+      console.error('WebSocket connection error:', error);
+    });
+  
+    socket.on('connect_error', (error) => {
+      console.error('Connection error:', error.message);
+    });
+  
+  } catch (err) {
+    console.error('Synchronous error caught:', err);
+  }
 
 
 const serverPort = process.env.PORT || 3002;
@@ -54,12 +59,10 @@ wss.on("connection", function (ws, req) {
   console.log("Client size: ", wss.clients.size);
 
   if (wss.clients.size === 1) {
-    console.log("first connection. starting keepalivezzzz");
+    console.log("first connection. starting keepalive");
     keepServerAlive();
   }
- socket.on('casino/abj' , (data) => {
-         broadcast(ws, JSON.stringify(data), true);
-      });
+ 
     
   ws.on("message", (data) => {
     let stringifiedData = data.toString();
