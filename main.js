@@ -7,6 +7,32 @@ app.use(express.static("public"));
 
 
 
+    const socket = IO('wss://eventv4.urbet.in', {
+      transports: ['websocket'],
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      reconnectionAttempts: 99999,
+      extraHeaders: {
+        Origin: 'https://urbet.in' // Replace with your desired custom origin
+      }
+    });
+  
+    socket.on('connect', () => {
+      console.log('_type');
+      socket.emit('casino', 'abj');
+    });
+
+
+    
+    
+      
+       
+    
+      socket.on('disconnect', () => {
+        console.log('WebSocket connection closed');
+      });
+    
 
 
 
@@ -23,49 +49,6 @@ const wss =
     : new WebSocket.Server({ port: 5001 });
 
 server.listen(serverPort);
-
-
-
-
-    const socket = IO('wss://eventv4.urbet.in', {
-      transports: ['websocket'],
-      reconnection: true,
-      reconnectionDelay: 1000,
-      reconnectionDelayMax: 5000,
-      reconnectionAttempts: 99999,
-      extraHeaders: {
-        Origin: 'https://urbet.in' // Replace with your desired custom origin
-      }
-    });
-     socket.on('connect', () => {
-      console.log('connected to server');
-      socket.emit('casino', 'abj');
-    });
- socket.on('error', (error) => {
-  console.error('WebSocket error occurred:', error);
-});
-
-// Handling reconnection attempts
-socket.on('reconnect_attempt', (attemptNumber) => {
-  console.log(`Reconnect attempt #${attemptNumber}`);
-});
-
-// Handling successful reconnections
-socket.on('reconnect', (attemptNumber) => {
-  console.log(`Successfully reconnected after ${attemptNumber} attempts`);
-});
-    
-      socket.on('disconnect', () => {
-        console.log('WebSocket connection closed');
-      });
-    
-
-
-
-
-
-
-
 console.log(`Server started on port ${serverPort} in stage ${process.env.NODE_ENV}`);
 
 wss.on("connection", function (ws, req) {
@@ -76,17 +59,17 @@ wss.on("connection", function (ws, req) {
     console.log("first connection. starting keepalive");
     keepServerAlive();
   }
-
+ socket.on('casino/abj' , (data) => {
+         broadcast(ws, JSON.stringify(data), true);
+      });
+    
   ws.on("message", (data) => {
     let stringifiedData = data.toString();
     if (stringifiedData === 'pong') {
       console.log('keepAlive');
       return;
     }  
-    socket.on('casino/abj' , (data) => {
-         broadcast(ws, JSON.stringify(data), false);
-      });
-    
+   
    
   });
 
