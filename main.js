@@ -1,70 +1,83 @@
-const IO = require('socket.io-client');
-const http = require('http');
-const socketIO = require('socket.io');
+const http = require("http");
+const express = require("express");
+const app = express();
 
-const port = 9792;
+app.use(express.static("public"));
+// require("dotenv").config();
 
-const ConnectBase = (_io, _type, _id) => {
-  const socket = IO('wss://spusher.jpl99.in', {
-    transports: ['websocket'],
-    reconnection: true,
-    reconnectionDelay: 1000,
-    reconnectionDelayMax: 5000,
-    reconnectionAttempts: 99999,
-    extraHeaders: {
-      Origin: 'https://balaji12.co' // Replace with your desired custom origin
+const serverPort = process.env.PORT || 3000;
+const server = http.createServer(app);
+const WebSocket = require("ws");
+
+let keepAliveId;
+
+const wss =
+  process.env.NODE_ENV === "production"
+    ? new WebSocket.Server({ server })
+    : new WebSocket.Server({ port: 5001 });
+
+server.listen(serverPort);
+console.log(`Server started on port ${serverPort} in stage ${process.env.NODE_ENV}`);
+
+wss.on("connection", function (ws, req) {
+  console.log("Connection Opened");
+  console.log("Client size: ", wss.clients.size);
+
+  if (wss.clients.size === 1) {
+    console.log("first connection. starting keepalive");
+    keepServerAlive();
+  }
+
+  ws.on("message", (data) => {
+    let stringifiedData = data.toString();
+    if (stringifiedData === 'pong') {
+      console.log('keepAlive');
+      return;
+    }
+    broadcast(ws, stringifiedData, false);
+  });
+
+  ws.on("close", (data) => {
+    console.log("closing connection");
+
+    if (wss.clients.size === 0) {
+      console.log("last client disconnected, stopping keepAlive interval");
+      clearInterval(keepAliveId);
     }
   });
-
-  socket.on('connect', () => {
-    console.log(_type);
-    socket.emit(_type, _id);
-  });
-
-  socket.on('alwarevents/' + _id, (data) => {
-    _io.emit('gems/' + _id, data);
-    const market_id = JSON.parse(data).market_id;
-    socket.emit('bm_odds', market_id);
-    socket.emit('auto_fancy', market_id);
-  });
-
-  socket.on('casino/' + _id, (data) => {
-    _io.emit('gems/' + _id, data);
-  });
-
-  socket.on('bm_odds', (...data) => {
-    _io.emit('bm_odds', data);
-  });
-
-  socket.on('autofancy', (...data) => {
-    _io.emit('autofancy', data);
-  });
-
-  socket.on('disconnect', () => {
-    console.log('WebSocket connection closed');
-  });
-};
-
-// Create an HTTP server
-const server = http.createServer();
-
-// Start the server
-server.listen(port, () => {
-  console.log(`Server listening on port ${port}`);
 });
 
-// Create an instance of Socket.IO and listen on the server
-const io = socketIO(server);
+// Implement broadcast function because of ws doesn't have it
+const broadcast = (ws, message, includeSelf) => {
+  if (includeSelf) {
+    wss.clients.forEach((client) => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(message);
+      }
+    });
+  } else {
+    wss.clients.forEach((client) => {
+      if (client !== ws && client.readyState === WebSocket.OPEN) {
+        client.send(message);
+      }
+    });
+  }
+};
 
-// Handle Socket.IO connection
-io.on('connection', (_io) => {
-  console.log('A client connected.');
+/**
+ * Sends a ping message to all connected clients every 50 seconds
+ */
+ const keepServerAlive = () => {
+  keepAliveId = setInterval(() => {
+    wss.clients.forEach((client) => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send('ping');
+      }
+    });
+  }, 50000);
+};
 
-  _io.on('casino', (ID) => {
-    ConnectBase(_io, 'casino', ID);
-  });
 
-  _io.on('gems', (ID) => {
-    ConnectBase(_io, 'alwarevents', ID);
-  });
+app.get('/', (req, res) => {
+    res.send('Hello World!');
 });
