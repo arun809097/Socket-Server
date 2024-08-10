@@ -1,30 +1,11 @@
 const http = require("http");
 const express = require("express");
 const app = express();
-const IO = require('socket.io-client');
+
 app.use(express.static("public"));
 // require("dotenv").config();
 
-
-try{
-    const socket = IO('ws://eventv4.urbet.in', {
-      transports: ['websocket'],
-      reconnection: true,
-      reconnectionDelay: 1000,
-      reconnectionDelayMax: 5000,
-      reconnectionAttempts: 99999,
-      extraHeaders: {
-        Origin: 'https://urbet.in' // Replace with your desired custom origin
-      }
-    });
-  
-}catch(err){console.log(err)}
-    
-
-
-
-
-const serverPort = process.env.PORT || 3002;
+const serverPort = process.env.PORT || 3000;
 const server = http.createServer(app);
 const WebSocket = require("ws");
 
@@ -47,15 +28,13 @@ wss.on("connection", function (ws, req) {
     keepServerAlive();
   }
 
-    
   ws.on("message", (data) => {
     let stringifiedData = data.toString();
     if (stringifiedData === 'pong') {
       console.log('keepAlive');
       return;
-    }  
-   
-   
+    }
+    broadcast(ws, stringifiedData, false);
   });
 
   ws.on("close", (data) => {
