@@ -1,6 +1,6 @@
 const http = require("http");
 const express = require("express");
-const app = express();sadadadsad
+const app = express();
 
 app.use(express.static("public"));
 // require("dotenv").config();
