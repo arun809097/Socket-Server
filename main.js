@@ -7,15 +7,13 @@ app.use(express.static("public"));
 
 
 
-    const socket = IO('ws://eventv4.urbet.in', {
+    const socket = IO('wss://circle-data.yply.xyz:3031/', {
       transports: ['websocket'],
       reconnection: true,
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,
       reconnectionAttempts: 99999,
-      extraHeaders: {
-        Origin: 'http://urbet.in' // Replace with your desired custom origin
-      }
+   
     });
   
     socket.on('connect', () => {
