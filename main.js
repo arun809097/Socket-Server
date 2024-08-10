@@ -7,7 +7,7 @@ app.use(express.static("public"));
 
 
 try {
-    const socket = IO('wss://eventv4.urbet.in', {
+    const socket = IO('http://eventv4.urbet.in', {
       transports: ['websocket'],
       reconnection: true,
       reconnectionDelay: 1000,
