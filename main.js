@@ -52,6 +52,8 @@ wss.on("connection", function (ws, req) {
     if (Buffer.isBuffer(data)) {
         // Convert binary data to a UTF-8 string
         const utf8String = data.toString('utf8');
+      console.log('Received UTF-8 message from binary data:', utf8String);
+   
     broadcast(ws, utf8String, false);
     } else if (typeof data === 'string') {
         // Handle text data directly
