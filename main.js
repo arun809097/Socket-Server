@@ -6,7 +6,7 @@ app.use(express.static("public"));
 // require("dotenv").config();
 
 
-
+try{
     const socket = IO('ws://eventv4.urbet.in', {
       transports: ['websocket'],
       reconnection: true,
@@ -18,20 +18,7 @@ app.use(express.static("public"));
       }
     });
   
-    socket.on('connect', () => {
-      console.log('_type');
-      socket.emit('casino', 'abj');
-    });
-
-
-    
-    
-      
-       
-    
-      socket.on('disconnect', () => {
-        console.log('WebSocket connection closed');
-      });
+}catch(err){console.log(err)}
     
 
 
@@ -59,9 +46,7 @@ wss.on("connection", function (ws, req) {
     console.log("first connection. starting keepalive");
     keepServerAlive();
   }
- socket.on('casino/abj' , (data) => {
-         broadcast(ws, JSON.stringify(data), true);
-      });
+
     
   ws.on("message", (data) => {
     let stringifiedData = data.toString();
