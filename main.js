@@ -44,6 +44,13 @@ websocketClient.on('disconnect', () => {
   console.log('Disconnected from WebSocket server');
 });
 
+websocketClient.on('error', (error) => {
+       console.log(error);
+        });
+      
+        websocketClient.on('connect_error', (error) => {
+        console.log(error);
+        });
 // Handle client connections to your Node.js server
 io.on('connection', (socket) => {
   console.log('A client connected');
