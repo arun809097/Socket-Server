@@ -1,6 +1,7 @@
-const http = require("http");
+const https = require("https");
 const express = require("express");
 const app = express();
+const fs = require('fs');
 
 // Uncomment if using environment variables
 // require("dotenv").config();
@@ -9,15 +10,17 @@ app.use(express.static("public"));
 
 const IO = require('socket.io-client');
 
+const privateKey = fs.readFileSync('./private.key', 'utf8');
+const certificate = fs.readFileSync('./certificate.cert', 'utf8');
 
-const serverPort = process.env.PORT || 3000;
+const serverPort = process.env.PORT || 3003;
+const credentials = { key: privateKey, cert: certificate };
 
 // Create HTTPS server using the SSL certificate files and attach the Express app
-const httpServer = http.createServer( app);
+const httpsServer = https.createServer(credentials, app);
 
 app.get('/', (req, res) => {
   
-
 try {
     const socket = IO('wss://spusher.mv3xpro.in', {
       transports: ['websocket'],
@@ -51,10 +54,8 @@ try {
  res.send( err);
   }
 
-
-  
 });
 
-const server = httpServer.listen(serverPort, () => {
+const server = httpsServer.listen(serverPort, () => {
     console.log(`Server listening on port ${serverPort}`);
 });
