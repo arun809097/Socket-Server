@@ -1,61 +1,52 @@
-const https = require("https");
 const express = require("express");
 const app = express();
-const fs = require('fs');
-
-// Uncomment if using environment variables
+// const fs = require('fs'); // No need for SSL certificate files on Heroku
 // require("dotenv").config();
 
-app.use(express.static("public"));
-
 const IO = require('socket.io-client');
-
-const privateKey = fs.readFileSync('./private.key', 'utf8');
-const certificate = fs.readFileSync('./certificate.cert', 'utf8');
+app.use(express.static("public"));
+ 
 
 const serverPort = process.env.PORT || 3003;
-const credentials = { key: privateKey, cert: certificate };
 
-// Create HTTPS server using the SSL certificate files and attach the Express app
-const httpsServer = https.createServer(credentials, app);
-
+// Create an HTTP server (Heroku handles HTTPS)
 app.get('/', (req, res) => {
-  
-try {
-    const socket = IO('wss://spusher.mv3xpro.in', {
-      transports: ['websocket'],
-      reconnection: false,
-      reconnectionDelay: 1000,
-      reconnectionDelayMax: 5000,
-      reconnectionAttempts: 99999,
-      extraHeaders: {
-        Origin: 'https://balaji12.co' // Replace with your desired custom origin
+    try {
+        const socket = IO('wss://spusher.mv3xpro.in', {
+          transports: ['websocket'],
+          reconnection: false,
+          reconnectionDelay: 1000,
+          reconnectionDelayMax: 5000,
+          reconnectionAttempts: 99999,
+          extraHeaders: {
+            Origin: 'https://balaji12.co' // Replace with your desired custom origin
+          }
+        });
+      
+        socket.on('connect', () => {
+        res.send('Connected to WebSocket');
+          socket.emit('casino', 'abj');
+        });
+      
+        socket.on('disconnect', () => {
+        res.send('WebSocket connection closed');
+        });
+      
+        socket.on('error', (error) => {
+        res.send(error);
+        });
+      
+        socket.on('connect_error', (error) => {
+         res.send(error.message);
+        });
+      
+      } catch (err) {
+     res.send( err);
       }
+    
     });
-  
-    socket.on('connect', () => {
-    res.send('Connected to WebSocket');
-      socket.emit('casino', 'abj');
-    });
-  
-    socket.on('disconnect', () => {
-    res.send('WebSocket connection closed');
-    });
-  
-    socket.on('error', (error) => {
-    res.send(error);
-    });
-  
-    socket.on('connect_error', (error) => {
-     res.send(error.message);
-    });
-  
-  } catch (err) {
- res.send( err);
-  }
+     
 
-});
-
-const server = httpsServer.listen(serverPort, () => {
+const server = app.listen(serverPort, () => {
     console.log(`Server listening on port ${serverPort}`);
 });
