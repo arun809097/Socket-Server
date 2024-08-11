@@ -8,7 +8,7 @@ app.use(express.static("public"));
 const IO = require('socket.io-client');
 
 const privateKey = fs.readFileSync('./private.key', 'utf8');
-const certificate = fs.readFileSync('./certificate.crt', 'utf8');
+const certificate = fs.readFileSync('./certificate.cert', 'utf8');
 
 const serverPort = process.env.PORT || 3000;
 // Create HTTPS server using the SSL certificate files
