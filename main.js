@@ -35,25 +35,28 @@ try {
     });
   
     socket.on('connect', () => {
-      console.log('Connected to WebSocket');
+    res.send('Connected to WebSocket');
       socket.emit('casino', 'abj');
     });
   
     socket.on('disconnect', () => {
-      console.log('WebSocket connection closed');
+    res.send('WebSocket connection closed');
     });
   
     socket.on('error', (error) => {
-      console.error('WebSocket connection error:', error);
+    res.send('WebSocket connection error:', error);
     });
   
     socket.on('connect_error', (error) => {
-      console.error('Connection error:', error.message);
+     res.send('Connection error:', error.message);
     });
   
   } catch (err) {
-    console.error('Synchronous error caught:', err);
+ res.send('Synchronous error caught:', err);
   }
+
+
+  
 });
 
 const server = httpServer.listen(serverPort, () => {
