@@ -1,4 +1,4 @@
-const http = require("http");
+const https = require("https");
 const express = require("express");
 const app = express();
 const IO = require('socket.io-client');
@@ -41,7 +41,7 @@ try {
 
 
 const serverPort = process.env.PORT || 3002;
-const server = http.createServer(app);
+const server = https.createServer(app);
 const WebSocket = require("ws");
 
 let keepAliveId;
