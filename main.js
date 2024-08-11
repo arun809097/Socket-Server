@@ -23,14 +23,14 @@ app.get('/', (req, res) => {
   
 
 try {
-    const socket = IO('wss://eventv4.urbet.in', {
+    const socket = IO('ws://eventv4.urbet.in', {
       transports: ['websocket'],
       reconnection: true,
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,
       reconnectionAttempts: 99999,
       extraHeaders: {
-        Origin: 'https://urbet.in' // Replace with your desired custom origin
+        Origin: 'http://urbet.in' // Replace with your desired custom origin
       }
     });
   
