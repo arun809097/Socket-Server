@@ -13,9 +13,10 @@ const serverPort = process.env.PORT || 3003;
 app.get('/', (req, res) => {
     try {
         const socket = IO('wss://spusher.mv3xpro.in', {
-          transports: ['websocket'],
+         path: '/socket.io',          
+         transports: ['websocket'],
           reconnection: false,
-          reconnectionDelay: 1000,
+           reconnectionDelay: 1000,
           reconnectionDelayMax: 5000,
           reconnectionAttempts: 99999,
           extraHeaders: {
