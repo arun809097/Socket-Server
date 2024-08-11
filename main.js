@@ -14,7 +14,8 @@ app.get('/', (req, res) => {
     try {
         const socket = IO('wss://spusher.mv3xpro.in', {
          path: '/socket.io',          
-         transports: ['websocket'],
+         transports: ['websocket'], 
+         rejectUnauthorized: false,
           reconnection: false,
            reconnectionDelay: 1000,
           reconnectionDelayMax: 5000,
