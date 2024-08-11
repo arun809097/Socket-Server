@@ -9,7 +9,7 @@ const server = http.createServer(app);
 const io = socketIo(server);
 
 // Replace with your WebSocket server URL
-const websocketServerUrl = 'ws://spusher.mv3xpro.in';
+const websocketServerUrl = 'wss://spusher.mv3xpro.in';
 const websocketClient = ioClient(websocketServerUrl, {
          path: '/socket.io',          
          transports: ['websocket'], 
@@ -19,7 +19,7 @@ const websocketClient = ioClient(websocketServerUrl, {
           reconnectionDelayMax: 5000,
           reconnectionAttempts: 99999,
           extraHeaders: {
-            Origin: 'http://balaji12.co' // Replace with your desired custom origin
+            Origin: 'https://balaji12.co' // Replace with your desired custom origin
           }
         });
 
