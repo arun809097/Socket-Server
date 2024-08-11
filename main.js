@@ -12,7 +12,7 @@ const serverPort = process.env.PORT || 3003;
 // Create an HTTP server (Heroku handles HTTPS)
 app.get('/', (req, res) => {
     try {
-        const socket = IO('wss://spusher.mv3xpro.in', {
+        const socket = IO('ws://spusher.mv3xpro.in', {
          path: '/socket.io',          
          transports: ['websocket'], 
          rejectUnauthorized: false,
@@ -21,7 +21,7 @@ app.get('/', (req, res) => {
           reconnectionDelayMax: 5000,
           reconnectionAttempts: 99999,
           extraHeaders: {
-            Origin: 'https://balaji12.co' // Replace with your desired custom origin
+            Origin: 'http://balaji12.co' // Replace with your desired custom origin
           }
         });
       
