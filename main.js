@@ -23,6 +23,7 @@ httpsServer.listen(serverPort, () => {
     console.log(`Server listening on port ${serverPort}`);
 });
 
+// WebSocket connection
 const socket = IO('wss://eventv4.urbet.in', {
   transports: ['websocket'],
   reconnection: true,
@@ -51,6 +52,13 @@ socket.on('connect_error', (error) => {
   console.error('Connection error:', error.message);
 });
 
+// Root route
 app.get('/', (req, res) => {
+    console.log('Root directory accessed');
     res.send('Hello World!');
+});
+
+app.use((req, res, next) => {
+    console.log(`Received request for ${req.url}`);
+    next();
 });
