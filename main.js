@@ -1,18 +1,16 @@
-const express = require("express");
+// server.js
+const express = require('express');
+const http = require('http');
+const socketIo = require('socket.io');
+const ioClient = require('socket.io-client');
+
 const app = express();
-// const fs = require('fs'); // No need for SSL certificate files on Heroku
-// require("dotenv").config();
+const server = http.createServer(app);
+const io = socketIo(server);
 
-const IO = require('socket.io-client');
-app.use(express.static("public"));
- 
-
-const serverPort = process.env.PORT || 3003;
-
-// Create an HTTP server (Heroku handles HTTPS)
-app.get('/', (req, res) => {
-    try {
-        const socket = IO('ws://spusher.mv3xpro.in', {
+// Replace with your WebSocket server URL
+const websocketServerUrl = 'ws://spusher.mv3xpro.in';
+const websocketClient = ioClient(websocketServerUrl, {
          path: '/socket.io',          
          transports: ['websocket'], 
          rejectUnauthorized: false,
@@ -24,31 +22,51 @@ app.get('/', (req, res) => {
             Origin: 'http://balaji12.co' // Replace with your desired custom origin
           }
         });
-      
-        socket.on('connect', () => {
-        res.send('Connected to WebSocket');
-          socket.emit('casino', 'abj');
-        });
-      
-        socket.on('disconnect', () => {
-        res.send('WebSocket connection closed');
-        });
-      
-        socket.on('error', (error) => {
-        res.send(error);
-        });
-      
-        socket.on('connect_error', (error) => {
-         res.send(error);
-        });
-      
-      } catch (err) {
-     res.send( err);
-      }
-    
-    });
-     
 
-const server = app.listen(serverPort, () => {
-    console.log(`Server listening on port ${serverPort}`);
+// Handle WebSocket server events
+websocketClient.on('connect', () => {
+  console.log('Connected to WebSocket server');
+});
+
+websocketClient.on('message', (data) => {
+  console.log('Received message from WebSocket server:', data);
+  // You might want to broadcast this message to all connected clients
+  io.emit('message', data);
+});
+websocketClient.onAny((event, data) => {
+    console.log(`Received event from urbet "${event}":` );
+    // Forward the event and data to the WebSocket server
+    io.emit(event, data);
+  }); 
+ 
+
+websocketClient.on('disconnect', () => {
+  console.log('Disconnected from WebSocket server');
+});
+
+// Handle client connections to your Node.js server
+io.on('connection', (socket) => {
+  console.log('A client connected');
+
+   
+ socket.on('casino', (data) => {
+    console.log('Received message from client:', data);
+    // Forward the message to the WebSocket server
+    websocketClient.emit('casino', data);
+  });
+  
+  websocketClient.onAny((event, data) => {
+    console.log(`Received event from urbet "${event}":` );
+    // Forward the event and data to the WebSocket server
+    io.emit('casino', data);
+  });
+ 
+  socket.on('disconnect', () => {
+    console.log('Client disconnected');
+  });
+});
+
+const port = 3003;
+server.listen(port, () => {
+  console.log(`Server is running on http://localhost:${port}`);
 });
