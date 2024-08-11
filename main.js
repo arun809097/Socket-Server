@@ -25,7 +25,7 @@ app.get('/', (req, res) => {
 try {
     const socket = IO('ws://eventv4.urbet.in', {
       transports: ['websocket'],
-      reconnection: true,
+      reconnection: false,
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,
       reconnectionAttempts: 99999,
