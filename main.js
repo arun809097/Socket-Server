@@ -1,7 +1,7 @@
 const IO = require('socket.io-client');
 const fs = require('fs');
 const https = require('https');
-const socket = require('socket.io');
+const socketIO = require('socket.io');
 // Read the SSL certificate files
 const privateKey = fs.readFileSync('./private.key', 'utf8');
 const certificate = fs.readFileSync('./certificate.cert', 'utf8');
