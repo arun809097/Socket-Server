@@ -1,6 +1,7 @@
 const https = require("https");
 const express = require("express");
 const app = express();
+const fs = require('fs');
 app.use(express.static("public"));
 // require("dotenv").config();
 
@@ -58,7 +59,7 @@ app.get('/', (req, res) => {
 
 
 
-const server = httpsServer.listen(port, () => {
-    console.log(`Server listening on port ${port}`);
+const server = httpsServer.listen(serverPort, () => {
+    console.log(`Server listening on port ${serverPort}`);
   });
   
