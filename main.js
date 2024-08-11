@@ -37,7 +37,7 @@ app.get('/', (req, res) => {
         });
       
         socket.on('connect_error', (error) => {
-         res.send(error.message);
+         res.send(error);
         });
       
       } catch (err) {
