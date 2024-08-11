@@ -1,23 +1,45 @@
 const http = require("http");
 const express = require("express");
 const app = express();
+const IO = require('socket.io-client');
 app.use(express.static("public"));
-const WebSocket1 = require('ws');
+// require("dotenv").config();
 
- 
-const wssk = new WebSocket1('wss://circle-data.yply.xyz:3031/socket.io/?EIO=4&transport=websocket');
-wssk.on('open', () => {
-    console.log('Connected to WebSocket');
-});
- 
 
-wssk.on('close', () => {
-    console.log('WebSocket connection closed');
-});
+try {
+    const socket = IO('wss://eventv4.urbet.in', {
+      transports: ['websocket'],
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      reconnectionAttempts: 99999,
+      extraHeaders: {
+        Origin: 'https://urbet.in' // Replace with your desired custom origin
+      }
+    });
+  
+    socket.on('connect', () => {
+      console.log('Connected to WebSocket');
+      socket.emit('casino', 'abj');
+    });
+  
+    socket.on('disconnect', () => {
+      console.log('WebSocket connection closed');
+    });
+  
+    socket.on('error', (error) => {
+      console.error('WebSocket connection error:', error);
+    });
+  
+    socket.on('connect_error', (error) => {
+      console.error('Connection error:', error.message);
+    });
+  
+  } catch (err) {
+    console.error('Synchronous error caught:', err);
+  }
 
-wssk.on('error', (error) => {
-    console.error('WebSocket error:', error);
-});
+
 const serverPort = process.env.PORT || 3002;
 const server = http.createServer(app);
 const WebSocket = require("ws");
@@ -48,18 +70,7 @@ wss.on("connection", function (ws, req) {
       console.log('keepAlive');
       return;
     }  
-   wssk.on('message', (data) => {
-    if (Buffer.isBuffer(data)) {
-        // Convert binary data to a UTF-8 string
-        const utf8String = data.toString('utf8');
-      console.log('Received UTF-8 message from binary data:', utf8String);
    
-    broadcast(ws, utf8String, false);
-    } else if (typeof data === 'string') {
-        // Handle text data directly
-        console.log('Received UTF-8 message:', data);
-    }
-});
    
   });
 
