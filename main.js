@@ -40,15 +40,15 @@ try {
     });
   
     socket.on('error', (error) => {
-    res.send('WebSocket connection error:', error);
+    res.send(error);
     });
   
     socket.on('connect_error', (error) => {
-     res.send('Connection error:', error.message);
+     res.send(error.message);
     });
   
   } catch (err) {
- res.send('Synchronous error caught:', err);
+ res.send( err);
   }
 
 
