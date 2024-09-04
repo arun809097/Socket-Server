@@ -1,79 +1,83 @@
-// server.js
-const express = require('express');
-const http = require('http');
-const socketIo = require('socket.io');
-const ioClient = require('socket.io-client');
-
+const http = require("http");
+const express = require("express");
 const app = express();
+
+app.use(express.static("public"));
+// require("dotenv").config();
+
+const serverPort = process.env.PORT || 3000;
 const server = http.createServer(app);
-const io = socketIo(server);
+const WebSocket = require("ws");
 
-// Replace with your WebSocket server URL
-const websocketServerUrl = 'wss://spusher.mv3xpro.in';
-const websocketClient = ioClient(websocketServerUrl, {
-         path: '/socket.io',          
-         transports: ['websocket'], 
-         rejectUnauthorized: false,
-          reconnection: false,
-           reconnectionDelay: 1000,
-          reconnectionDelayMax: 5000,
-          reconnectionAttempts: 99999,
-          extraHeaders: {
-            Origin: 'https://balaji12.co' // Replace with your desired custom origin
-          }
-        });
+let keepAliveId;
 
-// Handle WebSocket server events
-websocketClient.on('connect', () => {
-  console.log('Connected to WebSocket server');
-});
+const wss =
+  process.env.NODE_ENV === "production"
+    ? new WebSocket.Server({ server })
+    : new WebSocket.Server({ port: 5001 });
 
-websocketClient.on('message', (data) => {
-  console.log('Received message from WebSocket server:', data);
-  // You might want to broadcast this message to all connected clients
-  io.emit('message', data);
-});
-websocketClient.onAny((event, data) => {
-    console.log(`Received event from urbet "${event}":` );
-    // Forward the event and data to the WebSocket server
-    io.emit(event, data);
-  }); 
- 
+server.listen(serverPort);
+console.log(`Server started on port ${serverPort} in stage ${process.env.NODE_ENV}`);
 
-websocketClient.on('disconnect', () => {
-  console.log('Disconnected from WebSocket server');
-});
+wss.on("connection", function (ws, req) {
+  console.log("Connection Opened");
+  console.log("Client size: ", wss.clients.size);
 
-websocketClient.on('error', (error) => {
-       console.log(error);
-        });
-      
-        websocketClient.on('connect_error', (error) => {
-        console.log(error);
-        });
-// Handle client connections to your Node.js server
-io.on('connection', (socket) => {
-  console.log('A client connected');
+  if (wss.clients.size === 1) {
+    console.log("first connection. starting keepalive");
+    keepServerAlive();
+  }
 
-   
- socket.on('casino', (data) => {
-    console.log('Received message from client:', data);
-    // Forward the message to the WebSocket server
-    websocketClient.emit('casino', data);
+  ws.on("message", (data) => {
+    let stringifiedData = data.toString();
+    if (stringifiedData === 'pong') {
+      console.log('keepAlive');
+      return;
+    }
+    broadcast(ws, stringifiedData, false);
   });
-  
-  websocketClient.onAny((event, data) => {
-    console.log(`Received event from urbet "${event}":` );
-    // Forward the event and data to the WebSocket server
-    io.emit('casino', data);
-  });
- 
-  socket.on('disconnect', () => {
-    console.log('Client disconnected');
+
+  ws.on("close", (data) => {
+    console.log("closing connection");
+
+    if (wss.clients.size === 0) {
+      console.log("last client disconnected, stopping keepAlive interval");
+      clearInterval(keepAliveId);
+    }
   });
 });
 
-const port = 3000;
-server.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
+// Implement broadcast function because of ws doesn't have it
+const broadcast = (ws, message, includeSelf) => {
+  if (includeSelf) {
+    wss.clients.forEach((client) => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(message);
+      }
+    });
+  } else {
+    wss.clients.forEach((client) => {
+      if (client !== ws && client.readyState === WebSocket.OPEN) {
+        client.send(message);
+      }
+    });
+  }
+};
+
+/**
+ * Sends a ping message to all connected clients every 50 seconds
+ */
+ const keepServerAlive = () => {
+  keepAliveId = setInterval(() => {
+    wss.clients.forEach((client) => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send('ping');
+      }
+    });
+  }, 50000);
+};
+
+
+app.get('/', (req, res) => {
+    res.send('Hello World!');
 });
