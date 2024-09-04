@@ -28,15 +28,14 @@ wss.on("connection", function (ws, req) {
     keepServerAlive();
   }
 
-  ws.on("message", (data) => {
-    let stringifiedData = data.toString();
-    if (stringifiedData === 'pong') {
-      console.log('keepAlive');
-      return;
-    }
-    broadcast(ws, stringifiedData, false);
-  });
+ ws.on("message", (data, isBinary) => {
+  if (!isBinary && data.toString() === 'pong') {
+    console.log('keepAlive');
+    return;
+  }
 
+  broadcast(ws, data, false, isBinary); // Adjust includeSelf as needed
+});
   ws.on("close", (data) => {
     console.log("closing connection");
 
@@ -48,17 +47,19 @@ wss.on("connection", function (ws, req) {
 });
 
 // Implement broadcast function because of ws doesn't have it
-const broadcast = (ws, message, includeSelf) => {
+const broadcast = (ws, message, includeSelf, isBinary) => {
+  const sendMessage = (client) => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(message, { binary: isBinary });
+    }
+  };
+
   if (includeSelf) {
-    wss.clients.forEach((client) => {
-      if (client.readyState === WebSocket.OPEN) {
-        client.send(message);
-      }
-    });
+    wss.clients.forEach(sendMessage);
   } else {
     wss.clients.forEach((client) => {
-      if (client !== ws && client.readyState === WebSocket.OPEN) {
-        client.send(message);
+      if (client !== ws) {
+        sendMessage(client);
       }
     });
   }
